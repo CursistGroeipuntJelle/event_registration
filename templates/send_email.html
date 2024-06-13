@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>E-mail sturen naar deelnemer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .email-form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .email-form label {
+            margin-bottom: 5px;
+        }
+
+        .email-form select, .email-form input[type="text"], .email-form textarea {
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 100%;
+        }
+
+        .email-form textarea {
+            height: 200px;
+            resize: none;
+        }
+
+        .email-form button {
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .email-form button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body style="background: url('{{ url_for('static', filename='background.jpg') }}') no-repeat center center fixed; background-size: cover;">
+    <div class="container">
+        <h1>E-mail sturen naar deelnemer</h1>
+        <form action="/send_email" method="POST" class="email-form">
+            <label for="participant_id">Selecteer deelnemer:</label>
+            <select name="participant_id" id="participant_id" required>
+                {% for participant in participants %}
+                <option value="{{ participant.id }}">{{ participant.name }} - {{ participant.email }}</option>
+                {% endfor %}
+            </select>
+            <label for="email_subject">E-mail onderwerp:</label>
+            <input type="text" name="email_subject" id="email_subject" placeholder="Onderwerp van de e-mail" required>
+            <label for="email_body">E-mail bericht:</label>
+            <textarea name="email_body" id="email_body" placeholder="Inhoud van de e-mail" required></textarea>
+            <button type="submit">Verstuur</button>
+        </form>
+        <a href="/">Terug naar overzicht</a>
+    </div>
+</body>
+</html>
