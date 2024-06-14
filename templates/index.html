@@ -4,8 +4,35 @@
     <meta charset="UTF-8">
     <title>Deelnemers</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .participant-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .participant-actions form {
+            display: inline;
+        }
+
+        .participant-actions button {
+            padding: 5px 10px;
+            background-color: #C70039;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .participant-actions button:hover {
+            background-color: #FF8300;
+        }
+    </style>
 </head>
-<body style="background: url('{{ url_for('static', filename='background.jpg') }}') no-repeat center center fixed; background-size: cover;">
+<body>
+    <nav>
+        <a href="/">Deelnemers</a>
+        <a href="/events">Evenementen</a>
+    </nav>
     <div class="container">
         <h1>Deelnemers</h1>
         <form action="/" method="GET">
@@ -14,9 +41,16 @@
         </form>
         <ul>
             {% for participant in participants %}
-            <li>{{ participant.name }} - {{ participant.email }}
-                <a href="{{ url_for('edit', id=participant.id) }}">Edit</a>
-                <a href="{{ url_for('delete', id=participant.id) }}">Delete</a>
+            <li>
+                {{ participant.name }} - {{ participant.email }}
+                <div class="participant-actions">
+                    <form action="{{ url_for('edit', id=participant.id) }}" method="GET">
+                        <button type="submit">Edit</button>
+                    </form>
+                    <form action="{{ url_for('delete', id=participant.id) }}" method="POST">
+                        <button type="submit">Delete</button>
+                    </form>
+                </div>
             </li>
             {% endfor %}
         </ul>

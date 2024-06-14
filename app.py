@@ -16,14 +16,27 @@ app.config['MAIL_DEFAULT_SENDER'] = 'jelle.van.hulle3@gmail.com'
 db = SQLAlchemy(app)
 mail = Mail(app)
 
+# Many-to-many relationship table
+event_participants = db.Table('event_participants',
+                              db.Column('event_id', db.Integer, db.ForeignKey('event.id'), primary_key=True),
+                              db.Column('participant_id', db.Integer, db.ForeignKey('participant.id'), primary_key=True)
+                              )
+
 
 class Participant(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(100), nullable=False, unique=True)
+    events = db.relationship('Event', secondary=event_participants, backref=db.backref('participants', lazy=True))
 
 
-# Zorg ervoor dat de database-initialisatie in de toepassingscontext wordt uitgevoerd
+class Event(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    date = db.Column(db.String(100), nullable=False)
+
+
+# Ensure database initialization in the application context
 with app.app_context():
     db.create_all()
 
@@ -51,7 +64,7 @@ def add():
     return redirect(url_for('index'))
 
 
-@app.route('/delete/<int:id>')
+@app.route('/delete/<int:id>', methods=['POST'])
 def delete(id):
     participant = Participant.query.get_or_404(id)
     db.session.delete(participant)
@@ -106,6 +119,75 @@ def send_email_page():
         return redirect(url_for('index'))
 
     return render_template('send_email.html', participants=participants)
+
+
+@app.route('/events', methods=['GET', 'POST'])
+def events():
+    events = Event.query.all()
+    return render_template('events.html', events=events)
+
+
+@app.route('/add_event', methods=['POST'])
+def add_event():
+    name = request.form['name']
+    date = request.form['date']
+    new_event = Event(name=name, date=date)
+    db.session.add(new_event)
+    db.session.commit()
+    return redirect(url_for('events'))
+
+
+@app.route('/delete_event/<int:id>', methods=['POST'])
+def delete_event(id):
+    event = Event.query.get_or_404(id)
+    db.session.delete(event)
+    db.session.commit()
+    return redirect(url_for('events'))
+
+
+@app.route('/edit_event/<int:id>', methods=['GET', 'POST'])
+def edit_event(id):
+    event = Event.query.get_or_404(id)
+    if request.method == 'POST':
+        event.name = request.form['name']
+        event.date = request.form['date']
+        db.session.commit()
+        return redirect(url_for('events'))
+    return render_template('edit_event.html', event=event)
+
+
+@app.route('/manage_event/<int:id>', methods=['GET', 'POST'])
+def manage_event(id):
+    event = Event.query.get_or_404(id)
+    participants = Participant.query.all()
+    if request.method == 'POST':
+        action = request.form['action']
+        participant_id = request.form['participant_id']
+        participant = Participant.query.get(participant_id)
+        if action == 'add':
+            event.participants.append(participant)
+        elif action == 'remove':
+            event.participants.remove(participant)
+        db.session.commit()
+        return redirect(url_for('manage_event', id=id))
+    return render_template('manage_event.html', event=event, participants=participants)
+
+
+@app.route('/email_event_participants', methods=['GET', 'POST'])
+def email_event_participants():
+    events = Event.query.all()
+    if request.method == 'POST':
+        event_id = request.form['event_id']
+        event = Event.query.get(event_id)
+        email_subject = request.form['email_subject']
+        email_body = request.form['email_body']
+
+        for participant in event.participants:
+            send_email_to_participant(participant, email_subject, email_body)
+
+        return redirect(url_for('events'))
+
+    return render_template('email_event_participants.html', events=events)
 
 
 def send_email_to_participant(participant, subject, body):

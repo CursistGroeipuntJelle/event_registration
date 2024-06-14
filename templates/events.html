@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Evenementen</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .event-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .event-actions form {
+            display: inline;
+        }
+
+        .event-actions button {
+            padding: 5px 10px;
+            background-color: #C70039;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .event-actions button:hover {
+            background-color: #FF8300;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="/">Deelnemers</a>
+        <a href="/events">Evenementen</a>
+    </nav>
+    <div class="container">
+        <h1>Evenementen</h1>
+        <ul>
+            {% for event in events %}
+            <li>
+                <strong>{{ event.name }}</strong><br>
+                <em>{{ event.date }}</em><br>
+                <div class="event-actions">
+                    <form action="{{ url_for('edit_event', id=event.id) }}" method="GET">
+                        <button type="submit">Edit</button>
+                    </form>
+                    <form action="{{ url_for('delete_event', id=event.id) }}" method="POST">
+                        <button type="submit">Delete</button>
+                    </form>
+                    <form action="{{ url_for('manage_event', id=event.id) }}" method="GET">
+                        <button type="submit">Beheer Deelnemers</button>
+                    </form>
+                    <form action="{{ url_for('email_event_participants') }}" method="GET">
+                        <button type="submit">Stuur E-mail naar Deelnemers</button>
+                    </form>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+        <form action="/add_event" method="POST">
+            <input type="text" name="name" placeholder="Evenement naam" required>
+            <input type="text" name="date" placeholder="Evenement datum" required>
+            <button type="submit">Toevoegen</button>
+        </form>
+        <br>
+        <a href="/">Terug naar overzicht</a>
+    </div>
+</body>
+</html>
