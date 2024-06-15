@@ -29,7 +29,7 @@
 
         .email-form button {
             padding: 10px 20px;
-            background-color: #007BFF;
+            background-color: #C70039;
             color: white;
             border: none;
             border-radius: 4px;
@@ -40,8 +40,21 @@
             background-color: #0056b3;
         }
     </style>
+    <script>
+        function fillPredefinedEmail() {
+            const predefinedEmails = {{ predefined_emails|tojson }};
+            const selectedEmail = document.getElementById('predefined_email').value;
+            if (selectedEmail) {
+                document.getElementById('email_subject').value = predefinedEmails[selectedEmail].subject;
+                document.getElementById('email_body').value = predefinedEmails[selectedEmail].body;
+            } else {
+                document.getElementById('email_subject').value = '';
+                document.getElementById('email_body').value = '';
+            }
+        }
+    </script>
 </head>
-<body style="background: url('{{ url_for('static', filename='background.jpg') }}') no-repeat center center fixed; background-size: cover;">
+<body>
     <nav>
         <a href="/">Deelnemers</a>
         <a href="/events">Evenementen</a>
@@ -53,6 +66,13 @@
             <select name="event_id" id="event_id" required>
                 {% for event in events %}
                 <option value="{{ event.id }}">{{ event.name }} - {{ event.date }}</option>
+                {% endfor %}
+            </select>
+            <label for="predefined_email">Gebruik voorgedefinieerde e-mail:</label>
+            <select id="predefined_email" onchange="fillPredefinedEmail()">
+                <option value="">-- Selecteer een optie --</option>
+                {% for key, email in predefined_emails.items() %}
+                <option value="{{ key }}">{{ email.subject }}</option>
                 {% endfor %}
             </select>
             <label for="email_subject">E-mail onderwerp:</label>

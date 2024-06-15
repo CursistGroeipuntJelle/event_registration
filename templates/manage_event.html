@@ -16,7 +16,7 @@
 
         .participant-actions button {
             padding: 5px 10px;
-            background-color: #007BFF;
+            background-color: #C70039;
             color: white;
             border: none;
             border-radius: 4px;
@@ -24,11 +24,39 @@
         }
 
         .participant-actions button:hover {
-            background-color: #0056b3;
+            background-color: #FF8300;
+        }
+
+        .add-participant-form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .add-participant-form label,
+        .add-participant-form input,
+        .add-participant-form button {
+            margin-bottom: 10px;
+        }
+
+        .add-participant-form input,
+        .add-participant-form button {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .add-participant-form button {
+            background-color: #28a745;
+            color: white;
+            cursor: pointer;
+        }
+
+        .add-participant-form button:hover {
+            background-color: #218838;
         }
     </style>
 </head>
-<body style="background: url('{{ url_for('static', filename='background.jpg') }}') no-repeat center center fixed; background-size: cover;">
+<body>
     <nav>
         <a href="/">Deelnemers</a>
         <a href="/events">Evenementen</a>
@@ -50,9 +78,9 @@
             </li>
             {% endfor %}
         </ul>
-        <h2>Voeg Deelnemers Toe</h2>
+        <h2>Voeg Bestaande Deelnemers Toe</h2>
         <form action="{{ url_for('manage_event', id=event.id) }}" method="POST">
-            <input type="hidden" name="action" value="add">
+            <input type="hidden" name="action" value="add_existing">
             <select name="participant_id">
                 {% for participant in participants %}
                 {% if participant not in event.participants %}
@@ -61,6 +89,15 @@
                 {% endfor %}
             </select>
             <button type="submit">Toevoegen</button>
+        </form>
+        <h2>Registreer Nieuwe Deelnemer en Voeg Toe</h2>
+        <form action="{{ url_for('manage_event', id=event.id) }}" method="POST" class="add-participant-form">
+            <input type="hidden" name="action" value="add_new">
+            <label for="name">Naam:</label>
+            <input type="text" name="name" placeholder="Naam" required>
+            <label for="email">Email:</label>
+            <input type="email" name="email" placeholder="Email" required>
+            <button type="submit">Registreer en Voeg Toe</button>
         </form>
         <br>
         <a href="/events">Terug naar evenementen</a>

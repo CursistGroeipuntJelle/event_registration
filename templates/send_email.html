@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>E-mail sturen naar deelnemer</title>
+    <title>Stuur E-mail</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <style>
         .email-form {
@@ -40,15 +40,39 @@
             background-color: #0056b3;
         }
     </style>
+    <script>
+        function fillPredefinedEmail() {
+            const predefinedEmails = {{ predefined_emails|tojson }};
+            const selectedEmail = document.getElementById('predefined_email').value;
+            if (selectedEmail) {
+                document.getElementById('email_subject').value = predefinedEmails[selectedEmail].subject;
+                document.getElementById('email_body').value = predefinedEmails[selectedEmail].body;
+            } else {
+                document.getElementById('email_subject').value = '';
+                document.getElementById('email_body').value = '';
+            }
+        }
+    </script>
 </head>
-<body style="background: url('{{ url_for('static', filename='background.jpg') }}') no-repeat center center fixed; background-size: cover;">
+<body>
+    <nav>
+        <a href="/">Deelnemers</a>
+        <a href="/events">Evenementen</a>
+    </nav>
     <div class="container">
-        <h1>E-mail sturen naar deelnemer</h1>
+        <h1>Stuur E-mail</h1>
         <form action="/send_email" method="POST" class="email-form">
-            <label for="participant_id">Selecteer deelnemer:</label>
+            <label for="participant_id">Selecteer Deelnemer:</label>
             <select name="participant_id" id="participant_id" required>
                 {% for participant in participants %}
                 <option value="{{ participant.id }}">{{ participant.name }} - {{ participant.email }}</option>
+                {% endfor %}
+            </select>
+            <label for="predefined_email">Gebruik voorgedefinieerde e-mail:</label>
+            <select id="predefined_email" onchange="fillPredefinedEmail()">
+                <option value="">-- Selecteer een optie --</option>
+                {% for key, email in predefined_emails.items() %}
+                <option value="{{ key }}">{{ email.subject }}</option>
                 {% endfor %}
             </select>
             <label for="email_subject">E-mail onderwerp:</label>
@@ -57,6 +81,7 @@
             <textarea name="email_body" id="email_body" placeholder="Inhoud van de e-mail" required></textarea>
             <button type="submit">Verstuur</button>
         </form>
+        <br>
         <a href="/">Terug naar overzicht</a>
     </div>
 </body>

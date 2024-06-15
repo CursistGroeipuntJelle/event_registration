@@ -36,6 +36,22 @@ class Event(db.Model):
     date = db.Column(db.String(100), nullable=False)
 
 
+# Predefined emails
+PREDEFINED_EMAILS = {
+    "afgelast": {
+        "subject": "Evenement afgelast",
+        "body": "Beste deelnemers, het evenement is jammer genoeg afgelast."
+    },
+    "herinnering": {
+        "subject": "Evenement herinnering",
+        "body": "Beste deelnemers, dit is een herinnering voor het aankomende evenement."
+    },
+    "bedankt": {
+        "subject": "Bedankt voor deelname",
+        "body": "Beste deelnemers, bedankt voor uw deelname aan het evenement."
+    }
+}
+
 # Ensure database initialization in the application context
 with app.app_context():
     db.create_all()
@@ -118,7 +134,7 @@ def send_email_page():
 
         return redirect(url_for('index'))
 
-    return render_template('send_email.html', participants=participants)
+    return render_template('send_email.html', participants=participants, predefined_emails=PREDEFINED_EMAILS)
 
 
 @app.route('/events', methods=['GET', 'POST'])
@@ -150,9 +166,9 @@ def edit_event(id):
     event = Event.query.get_or_404(id)
     if request.method == 'POST':
         event.name = request.form['name']
-        event.date = request.form['date']
-        db.session.commit()
-        return redirect(url_for('events'))
+    event.date = request.form['date']
+    db.session.commit()
+    return redirect(url_for('events'))
     return render_template('edit_event.html', event=event)
 
 
@@ -162,12 +178,21 @@ def manage_event(id):
     participants = Participant.query.all()
     if request.method == 'POST':
         action = request.form['action']
-        participant_id = request.form['participant_id']
-        participant = Participant.query.get(participant_id)
-        if action == 'add':
+        if action == 'add_existing':
+            participant_id = request.form['participant_id']
+            participant = Participant.query.get(participant_id)
             event.participants.append(participant)
         elif action == 'remove':
+            participant_id = request.form['participant_id']
+            participant = Participant.query.get(participant_id)
             event.participants.remove(participant)
+        elif action == 'add_new':
+            name = request.form['name']
+            email = request.form['email']
+            new_participant = Participant(name=name, email=email)
+            db.session.add(new_participant)
+            db.session.commit()
+            event.participants.append(new_participant)
         db.session.commit()
         return redirect(url_for('manage_event', id=id))
     return render_template('manage_event.html', event=event, participants=participants)
@@ -187,7 +212,7 @@ def email_event_participants():
 
         return redirect(url_for('events'))
 
-    return render_template('email_event_participants.html', events=events)
+    return render_template('email_event_participants.html', events=events, predefined_emails=PREDEFINED_EMAILS)
 
 
 def send_email_to_participant(participant, subject, body):
