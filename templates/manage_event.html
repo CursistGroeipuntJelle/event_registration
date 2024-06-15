@@ -16,7 +16,7 @@
 
         .participant-actions button {
             padding: 5px 10px;
-            background-color: #C70039;
+            background-color: #007BFF;
             color: white;
             border: none;
             border-radius: 4px;
@@ -24,7 +24,7 @@
         }
 
         .participant-actions button:hover {
-            background-color: #FF8300;
+            background-color: #0056b3;
         }
 
         .add-participant-form {
@@ -56,7 +56,7 @@
         }
     </style>
 </head>
-<body>
+<body style="background: url('{{ url_for('static', filename='background.jpg') }}') no-repeat center center fixed; background-size: cover;">
     <nav>
         <a href="/">Deelnemers</a>
         <a href="/events">Evenementen</a>
@@ -79,6 +79,10 @@
             {% endfor %}
         </ul>
         <h2>Voeg Bestaande Deelnemers Toe</h2>
+        <form action="{{ url_for('manage_event', id=event.id) }}" method="GET">
+            <input type="text" name="search" placeholder="Zoek op naam of e-mail">
+            <button type="submit">Zoeken</button>
+        </form>
         <form action="{{ url_for('manage_event', id=event.id) }}" method="POST">
             <input type="hidden" name="action" value="add_existing">
             <select name="participant_id">

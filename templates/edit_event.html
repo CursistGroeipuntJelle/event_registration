@@ -5,16 +5,16 @@
     <title>Bewerk Evenement</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-<body>
+<body style="background: url('{{ url_for('static', filename='background.jpg') }}') no-repeat center center fixed; background-size: cover;">
+    <nav>
+        <a href="/">Deelnemers</a>
+        <a href="/events">Evenementen</a>
+    </nav>
     <div class="container">
-        <nav>
-            <a href="/">Deelnemers</a>
-            <a href="/events">Evenementen</a>
-        </nav>
         <h1>Bewerk Evenement</h1>
         <form action="/edit_event/{{ event.id }}" method="POST">
             <input type="text" name="name" value="{{ event.name }}" required>
-            <input type="text" name="date" value="{{ event.date }}" required>
+            <input type="date" name="date" value="{{ event.date }}" required>
             <button type="submit">Opslaan</button>
         </form>
         <a href="/events">Terug naar evenementen</a>

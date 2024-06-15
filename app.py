@@ -49,10 +49,13 @@ PREDEFINED_EMAILS = {
     "bedankt": {
         "subject": "Bedankt voor deelname",
         "body": "Beste deelnemers, bedankt voor uw deelname aan het evenement."
+    },
+    "Winnaar": {
+        "subject": "Proficiat met jouw overwinning",
+        "body": "Beste deelnemer, proficiat met jouw overwinning we nemen zo snel mogelijk contact met jouw op."
     }
 }
 
-# Ensure database initialization in the application context
 with app.app_context():
     db.create_all()
 
@@ -64,9 +67,9 @@ def index():
         participants = Participant.query.filter(
             Participant.name.contains(search_query) |
             Participant.email.contains(search_query)
-        ).all()
+        ).order_by(Participant.name).all()
     else:
-        participants = Participant.query.all()
+        participants = Participant.query.order_by(Participant.name).all()
     return render_template('index.html', participants=participants)
 
 
@@ -139,7 +142,7 @@ def send_email_page():
 
 @app.route('/events', methods=['GET', 'POST'])
 def events():
-    events = Event.query.all()
+    events = Event.query.order_by(Event.name).all()
     return render_template('events.html', events=events)
 
 
@@ -166,16 +169,24 @@ def edit_event(id):
     event = Event.query.get_or_404(id)
     if request.method == 'POST':
         event.name = request.form['name']
-    event.date = request.form['date']
-    db.session.commit()
-    return redirect(url_for('events'))
+        event.date = request.form['date']
+        db.session.commit()
+        return redirect(url_for('events'))
     return render_template('edit_event.html', event=event)
 
 
 @app.route('/manage_event/<int:id>', methods=['GET', 'POST'])
 def manage_event(id):
     event = Event.query.get_or_404(id)
-    participants = Participant.query.all()
+    search_query = request.args.get('search')
+    if search_query:
+        participants = Participant.query.filter(
+            Participant.name.contains(search_query) |
+            Participant.email.contains(search_query)
+        ).order_by(Participant.name).all()
+    else:
+        participants = Participant.query.order_by(Participant.name).all()
+
     if request.method == 'POST':
         action = request.form['action']
         if action == 'add_existing':
@@ -195,22 +206,23 @@ def manage_event(id):
             event.participants.append(new_participant)
         db.session.commit()
         return redirect(url_for('manage_event', id=id))
+
     return render_template('manage_event.html', event=event, participants=participants)
 
 
 @app.route('/email_event_participants', methods=['GET', 'POST'])
 def email_event_participants():
-    events = Event.query.all()
+    events = Event.query.order_by(Event.name).all()
     if request.method == 'POST':
         event_id = request.form['event_id']
-        event = Event.query.get(event_id)
-        email_subject = request.form['email_subject']
-        email_body = request.form['email_body']
+    event = Event.query.get(event_id)
+    email_subject = request.form['email_subject']
+    email_body = request.form['email_body']
 
-        for participant in event.participants:
-            send_email_to_participant(participant, email_subject, email_body)
+    for participant in event.participants:
+        send_email_to_participant(participant, email_subject, email_body)
 
-        return redirect(url_for('events'))
+    return redirect(url_for('events'))
 
     return render_template('email_event_participants.html', events=events, predefined_emails=PREDEFINED_EMAILS)
 

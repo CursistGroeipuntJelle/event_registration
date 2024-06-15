@@ -16,7 +16,7 @@
 
         .event-actions button {
             padding: 5px 10px;
-            background-color: #C70039;
+            background-color: #007BFF;
             color: white;
             border: none;
             border-radius: 4px;
@@ -24,11 +24,11 @@
         }
 
         .event-actions button:hover {
-            background-color: #FF8300;
+            background-color: #0056b3;
         }
     </style>
 </head>
-<body>
+<body style="background: url('{{ url_for('static', filename='background.jpg') }}') no-repeat center center fixed; background-size: cover;">
     <nav>
         <a href="/">Deelnemers</a>
         <a href="/events">Evenementen</a>
@@ -59,7 +59,7 @@
         </ul>
         <form action="/add_event" method="POST">
             <input type="text" name="name" placeholder="Evenement naam" required>
-            <input type="text" name="date" placeholder="Evenement datum" required>
+            <input type="date" name="date" placeholder="Evenement datum" required>
             <button type="submit">Toevoegen</button>
         </form>
         <br>
