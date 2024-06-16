@@ -6,7 +6,7 @@ import random
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///participants.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['MAIL_SERVER'] = 'smtp-relay.brevo.com'  # Gebruik je eigen SMTP-server
+app.config['MAIL_SERVER'] = 'smtp-relay.brevo.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USERNAME'] = '769b5d001@smtp-brevo.com'
@@ -215,17 +215,16 @@ def email_event_participants():
     events = Event.query.order_by(Event.name).all()
     if request.method == 'POST':
         event_id = request.form['event_id']
-    event = Event.query.get(event_id)
-    email_subject = request.form['email_subject']
-    email_body = request.form['email_body']
+        event = Event.query.get(event_id)
+        email_subject = request.form['email_subject']
+        email_body = request.form['email_body']
 
-    for participant in event.participants:
-        send_email_to_participant(participant, email_subject, email_body)
+        for participant in event.participants:
+            send_email_to_participant(participant, email_subject, email_body)
 
-    return redirect(url_for('events'))
+        return redirect(url_for('events'))
 
     return render_template('email_event_participants.html', events=events, predefined_emails=PREDEFINED_EMAILS)
-
 
 def send_email_to_participant(participant, subject, body):
     msg = Message(subject, recipients=[participant.email])
